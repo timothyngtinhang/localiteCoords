@@ -1,0 +1,6 @@
+ComparisonName,ConditionName,ReferenceCoord,TargetCoord,EntryTarget
+CalculatedEntry,Vertex,EntryTarget,TMSTrigger,Entry
+PresumedTarget,Vertex,EntryTarget,TMSTrigger,Target
+MarkerEntry,Vertex,InstrumentMarkers,TMSTrigger,NA
+ImportedMarker_iTBS,iTBS,InstrumentMarkers,TMSTrigger,NA
+ImportedMarker_cTBS,cTBS,InstrumentMarkers,TMSTrigger,NA
