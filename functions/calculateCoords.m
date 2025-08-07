@@ -30,7 +30,7 @@ function [TMS_Quality_raw, TMS_Quality_sum] = calculateCoords(all_files_with_coo
             for k = 1:numel(distNames) % processing a ref-trg comparison
                 nm = distNames{k}; % Ref Type
                 spec = condSpec.(nm); % assess Ref Type specs
-                
+               
                 refRow = table();
                 
                 % pick the reference row
@@ -42,12 +42,15 @@ function [TMS_Quality_raw, TMS_Quality_sum] = calculateCoords(all_files_with_coo
                             & trig.Type=="TMSTrigger", :); % instead of spec.RefType
                 if isempty(trgRow),  continue, end                 % entry not match to ref → skip
     
-                % -> only the valid rows remain now
+                %-> only the valid rows remain now
     
-                % handling missing file for reference row and trigger row
+               % handling missing file for reference row and trigger row
                 if trgRow.Date == refRow.Date
                     compDate = trgRow.Date;
+                else
+                    compDate = NaN; % or handle as needed
                 end
+
                 if ~ismember(refRow.Status, ["Finished", "Manual Fill"]) % filter ref coord missing
                     outRow = makeQualRow(subj(g), string(nm), compDate, NaN, NaN, NaN, NaN, NaN, NaN, ...
                                          "ref-" + refRow.Status);
@@ -66,14 +69,15 @@ function [TMS_Quality_raw, TMS_Quality_sum] = calculateCoords(all_files_with_coo
                     TMS_Quality_raw = [TMS_Quality_raw; rawRow];
                     continue                 % have entry but empty row → skip
                 end 
-                % -> note refRow missing before trgRow
+                %-> note refRow missing before trgRow
     
                 % loading the coordinates 
+                refCoord = [refRow.x_axis{1}(spec.idx) ... % inside x_axis content, select the idx's element
                 refCoord = [refRow.x_axis{1}(spec.idx) ... % inside x_axis content, select the idx's element
                             refRow.y_axis{1}(spec.idx) ...
                             refRow.z_axis{1}(spec.idx)];
                 trgCoord = [trgRow.x_axis{:}, trgRow.y_axis{:}, trgRow.z_axis{:}];
-    
+
                 % handling RAS coordinate if any
                 [tf_refCoord, tf_refCoordSys] = RAS2LPS(refCoord, refRow.coord_system); % convert to same system                            
                 [tf_trgCoord, tf_trgCoordSys] = RAS2LPS(trgCoord, trgRow.coord_system); % convert to same system
