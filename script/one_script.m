@@ -50,11 +50,11 @@ all_valid_files = mapSessionFiles(validTable_long, pathTable, condMap);
 
 for i=1:height(all_valid_files) % replaces manualReplaceFile function
     if all_valid_files.ID(i) == "CC434" && all_valid_files.Date(i) == 20250506 && all_valid_files.Type(i) == "EntryTarget"
-        all_valid_files.FullPath{i} = strcat(organizedDir, "434\Sessions\Manually_created_sessions\EntryTarget\EntryTarget20250909111111111.xml");
+        all_valid_files.FullPath{i} = strcat(organizedDir, "434\Sessions\Manually_created_sessions\EntryTarget\EntryTarget20250506155405433.xml");
         all_valid_files.Status{i} = 'Manual Fill';
     elseif all_valid_files.ID(i) == "CC432" && all_valid_files.Date(i) == 20250527 && all_valid_files.Type(i) == "InstrumentMarkers"
         all_valid_files.FullPath{i} = strcat(organizedDir, "432\Sessions\Manually_created_sessions\InstrumentMarkers\InstrumentMarker20250527145647608.xml");
-        all_valid_files.Status{i} = 'Manual Fill';
+         all_valid_files.Status{i} = 'Manual Fill';
     elseif all_valid_files.ID(i) == "CC406" && all_valid_files.Date(i) == 20250122 && all_valid_files.Type(i) == "InstrumentMarkers"
         all_valid_files.FullPath{i} = strcat(organizedDir, "406\Sessions\Manually_created_sessions\InstrumentMarkers\InstrumentMarker20250122105915000.xml");
         all_valid_files.Status{i} = 'Manual Fill';
@@ -841,8 +841,10 @@ function all_files_with_coord = readCoordFromFiles(all_valid_files)
                     disp(['no enough markers for ', current_ID]);
                 end
                 
+                valid_trigger_times = []; %NEW: store timestamps of usable pulses
+
                 for k=1:numRows
-                    % % Extract the     amplitude
+                    % % Extract the amplitude
                     % fixed to correctly identify the vertex location [with vertex name]
             
                     % % Extract the coordinate
@@ -852,14 +854,54 @@ function all_files_with_coord = readCoordFromFiles(all_valid_files)
                     y_trig = all_sites{1, 1}(k).Matrix4D.data13Attribute;
                     z_trig = all_sites{1, 1}(k).Matrix4D.data23Attribute;
                     
+                    %NEW: check if Matrix4D has values other than only 0, -1, 1
+                    mat_vals = struct2array(all_sites{1, 1}(k).Matrix4D);
+                    if any(~ismember(mat_vals, [0, -1, 1]))
+                        %NEW: this pulse is valid → store timestamp
+                        valid_trigger_times = [valid_trigger_times; all_sites{1, 1}(k).recordingTimeAttribute];
+                    
                     % filter out empty coordinates
                     keep_row = ~(x_trig == 0 & y_trig == 0 & z_trig == 0);
     
-                    if keep_row 
+                        if keep_row 
                         all_valid_files.x_axis{f} = [all_valid_files.x_axis{f}; x_trig]; % append x
                         all_valid_files.y_axis{f} = [all_valid_files.y_axis{f}; y_trig];
                         all_valid_files.z_axis{f} = [all_valid_files.z_axis{f}; z_trig];
+                        end
                     end
+                end
+
+                %NEW: calculate time difference if enough usable points
+                if numel(valid_trigger_times) >= 2
+                    % Sort timestamps
+                    valid_trigger_times = sort(valid_trigger_times);
+                    
+                    % Calculate differences between consecutive timestamps
+                    time_gaps = diff(valid_trigger_times);
+                    
+                    % Threshold for big gap in ms
+                    big_gap_threshold = 15000;
+                    
+                    % Find indices where gap > threshold
+                    gap_indices = find(time_gaps > big_gap_threshold);
+                    
+                    % Define cluster boundaries
+                    cluster_start_idx = [1; gap_indices + 1];
+                    cluster_end_idx = [gap_indices; length(valid_trigger_times)];
+                    
+                    % Find cluster with max size
+                    cluster_sizes = cluster_end_idx - cluster_start_idx + 1;
+                    [~, largest_cluster_idx] = max(cluster_sizes);
+
+                    % Extract timestamps from largest cluster
+                    main_cluster_times = valid_trigger_times(cluster_start_idx(largest_cluster_idx):cluster_end_idx(largest_cluster_idx));
+                    
+                     % Calculate duration using main cluster only
+                    time_diff_ms = main_cluster_times(end) - main_cluster_times(1);
+                
+                    all_valid_files.duration_ms(f) = time_diff_ms;
+                else
+                    all_valid_files.duration_ms(f) = NaN;
                 end
             end
         else
@@ -869,7 +911,42 @@ function all_files_with_coord = readCoordFromFiles(all_valid_files)
     
     % drop excess column
     all_valid_files(:, 'TMS_Date') = [];
-        
+
+    % convert ms to sec
+    all_valid_files.duration_sec = all_valid_files.duration_ms / 1000;
+    % remove duration_ms
+    all_valid_files(:, 'duration_ms') = [];
+
+    % === NEW: Check if durations match expected condition durations ===
+    for checkIdx = 1:height(all_valid_files)
+        cond = string(all_valid_files.Cond(checkIdx));
+        duration = all_valid_files.duration_sec(checkIdx);
+
+        % Skip if duration is missing or zero
+        if isnan(duration) || duration == 0
+            continue
+        end
+
+        % Determine expected duration based on condition
+        if cond == "cTBS" || cond == "Vertex"
+            expected = 40; % seconds
+            tolerance = 5; % ±5s to allow for slight differences
+        elseif cond == "iTBS"
+            expected = 188; % seconds
+            tolerance = 5; % ±5s buffer
+        else
+            fprintf('Warning: Unknown condition "%s" in row %d\n', cond, checkIdx);
+            continue
+        end
+
+        % Check if duration is within expected range
+        if duration < (expected - tolerance) || duration > (expected + tolerance)
+            fprintf('[Duration Check] Condition "%s" in row %d has suspicious duration: %.1f sec (expected around %d sec)\n', ...
+            cond, checkIdx, duration, expected);
+
+        end
+    end
+
     all_files_with_coord = all_valid_files;
     
     save("all_files_with_coord.mat", "all_files_with_coord")
