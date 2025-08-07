@@ -26,13 +26,9 @@ configDir = fullfile(functionDir, 'config');
 addpath(genpath( functionDir ) );  % go up, then into 'functions'
 addpath(genpath( configDir ) );  % add config directory to path
 
-% % Create organized directory if it doesn't exist
-% if ~exist(fullfile(scriptDir, '..', config.dirs.organized), 'dir')
-%     mkdir(fullfile(scriptDir, '..', config.dirs.organized));
-% end
-
-if config.run_organizeData
-    organizeData(config.dirs.raw, config.dirs.organized, config.subjects)
+% Create organized directory if it doesn't exist
+if ~exist(fullfile(scriptDir, '..', config.dirs.organized), 'dir')
+    mkdir(fullfile(scriptDir, '..', config.dirs.organized));
 end
 
 % Load TMS conditions and specifications from CSVs
@@ -40,10 +36,7 @@ tms_contrast = tms_conditions_config(config);
 condMap = config.input.tms_conditions_table;
 
 rawDir = fullfile(scriptDir, '..', config.dirs.raw);  
-
-if config.utils.run_validSessWide2Long
-    organizedDir = fullfile(scriptDir, '..', config.dirs.organized); 
-end
+organizedDir = fullfile(scriptDir, '..', config.dirs.organized); 
 
 % rawDir = '../data/raw';
 subjects = config.subjects;
@@ -97,6 +90,9 @@ if config.utils.run_manualReplaceFile
 end
 
 all_files_with_coord = readCoordFromFiles(all_valid_files);
+if config.utils.run_checkDurationMatch
+   checkDurationMatch(all_files_with_coord, config);
+end
 
 % step 5: 
 
@@ -119,18 +115,18 @@ end
 
 [TMS_Quality_raw, TMS_Quality_sum] = calculateCoords(all_files_with_coord_eq, tms_contrast);
 
-% % Save extracted_paths.csv
-% save(pathTable, fullfile(config.dirs.organized, config.output.extracted_paths));
+% % Save extracted_paths.mat
+save(fullfile(config.dirs.output_save_path, config.output.extracted_paths), 'pathTable');
 % 
-% % Save all_valid_files.csv
-% save(all_valid_files, fullfile(config.dirs.organized, config.output.valid_files));
+% % Save all_valid_files.mat
+save(fullfile(config.dirs.output_save_path, config.output.valid_files), 'all_valid_files');
 % 
-% % Save all_files_with_coord.csv
-% save(all_files_with_coord_eq, fullfile(config.dirs.organized, config.output.all_files));
+% % Save all_files_with_coord.mat
+save(fullfile(config.dirs.output_save_path, config.output.all_files), 'all_files_with_coord_eq');
 % 
-% % Save the final TMS_Quality table to a CSV file
-% save(TMS_Quality_raw, fullfile(config.dirs.organized, config.output.tms_quality_raw));
-% save(TMS_Quality_sum, fullfile(config.dirs.organized, config.output.tms_quality_sum));
+% % Save the final TMS_Quality table to a MAT file
+save(fullfile(config.dirs.output_save_path, config.output.tms_quality_raw), 'TMS_Quality_raw');
+save(fullfile(config.dirs.output_save_path, config.output.tms_quality_sum), 'TMS_Quality_sum');
 
 fprintf('finished!\n');
 
@@ -144,13 +140,3 @@ function config = pipeline_config()
     
     run(GLOBAL_CONFIG_SCRIPT);
 end
-
-
-
-
-
-
-
-
-
-
