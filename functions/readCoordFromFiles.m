@@ -89,8 +89,10 @@ function all_files_with_coord = readCoordFromFiles(all_valid_files)
                     disp(['no enough markers for ', current_sub]);
                 end
                 
+                valid_trigger_times = []; %NEW: store timestamps of usable pulses
+                
                 for k=1:numRows
-                    % % Extract the     amplitude
+                    % % Extract the amplitude
                     % fixed to correctly identify the vertex location [with vertex name]
             
                     % % Extract the coordinate
@@ -99,6 +101,12 @@ function all_files_with_coord = readCoordFromFiles(all_valid_files)
                     x_trig = all_sites{1, 1}(k).Matrix4D.data03Attribute;
                     y_trig = all_sites{1, 1}(k).Matrix4D.data13Attribute;
                     z_trig = all_sites{1, 1}(k).Matrix4D.data23Attribute;
+
+                     %NEW: check if Matrix4D has values other than only 0, -1, 1
+                    mat_vals = struct2array(all_sites{1, 1}(k).Matrix4D);
+                    if any(~ismember(mat_vals, [0, -1, 1]))
+                        %NEW: this pulse is valid → store timestamp
+                        valid_trigger_times = [valid_trigger_times; all_sites{1, 1}(k).recordingTimeAttribute];
                     
                     % filter out empty coordinates
                     keep_row = ~(x_trig == 0 & y_trig == 0 & z_trig == 0);
@@ -110,6 +118,40 @@ function all_files_with_coord = readCoordFromFiles(all_valid_files)
                     end
                 end
             end
+
+           %NEW: calculate time difference if enough usable points
+                if numel(valid_trigger_times) >= 2
+                    % Sort timestamps
+                    valid_trigger_times = sort(valid_trigger_times);
+                    
+                    % Calculate differences between consecutive timestamps
+                    time_gaps = diff(valid_trigger_times);
+                    
+                    % Threshold for big gap in ms
+                    big_gap_threshold = 15000;
+                    
+                    % Find indices where gap > threshold
+                    gap_indices = find(time_gaps > big_gap_threshold);
+                    
+                    % Define cluster boundaries
+                    cluster_start_idx = [1; gap_indices + 1];
+                    cluster_end_idx = [gap_indices; length(valid_trigger_times)];
+                    
+                    % Find cluster with max size
+                    cluster_sizes = cluster_end_idx - cluster_start_idx + 1;
+                    [~, largest_cluster_idx] = max(cluster_sizes);
+
+                    % Extract timestamps from largest cluster
+                    main_cluster_times = valid_trigger_times(cluster_start_idx(largest_cluster_idx):cluster_end_idx(largest_cluster_idx));
+                    
+                     % Calculate duration using main cluster only
+                    time_diff_ms = main_cluster_times(end) - main_cluster_times(1);
+                
+                    all_valid_files.duration_ms(f) = time_diff_ms;
+                else
+                    all_valid_files.duration_ms(f) = NaN;
+                end
+            end
         else
             sprintf('Do not have relevant Type for %s', current_path);
         end
@@ -117,6 +159,11 @@ function all_files_with_coord = readCoordFromFiles(all_valid_files)
     
     % drop excess column
     all_valid_files(:, 'TMS_Date') = [];
+
+    % convert ms to sec
+    all_valid_files.duration_sec = all_valid_files.duration_ms / 1000;
+    % remove duration_ms
+    all_valid_files(:, 'duration_ms') = [];
         
     all_files_with_coord = all_valid_files;
     
@@ -144,10 +191,4 @@ end
 %     % no need remove missing files since source table already used inner
 %     % join to remove missing
 % end
-
-
-
-
-
-
 
