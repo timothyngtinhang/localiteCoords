@@ -73,7 +73,6 @@ function [TMS_Quality_raw, TMS_Quality_sum] = calculateCoords(all_files_with_coo
     
                 % loading the coordinates 
                 refCoord = [refRow.x_axis{1}(spec.idx) ... % inside x_axis content, select the idx's element
-                refCoord = [refRow.x_axis{1}(spec.idx) ... % inside x_axis content, select the idx's element
                             refRow.y_axis{1}(spec.idx) ...
                             refRow.z_axis{1}(spec.idx)];
                 trgCoord = [trgRow.x_axis{:}, trgRow.y_axis{:}, trgRow.z_axis{:}];
