@@ -8,7 +8,7 @@ This MATLAB package processes Localite TMS (Transcranial Magnetic Stimulation) d
 ## Features
 - Processes multiple TMS file types (EntryTarget, InstrumentMarkers, TMSTrigger)
 - Calculates Euclidean distances between reference points and TMS trigger locations
-- Checks whether pulse duration matches expected values per condition (e.g., iTBS ≈ 188 s, cTBS ≈ 40 s)
+- Checks whether pulse duration matches the expected time for each condition (e.g., iTBS ≈ 188 s, cTBS ≈ 40 s)
 - Supports multiple experimental conditions (Vertex, iTBS, cTBS)
 - Configurable pipeline with CSV-based session validation
 - Two execution modes: batch processing and self-contained single .m script
@@ -161,7 +161,7 @@ config.run_organizeData = false;              % Skip if already organized
 2. **Missing coordinates**: Check that Localite files contain valid coordinate data
 3. **Session validation**: Ensure session CSV files match your experimental timeline
 4. **Path issues**: Use absolute paths or ensure MATLAB working directory is correct
-5. **Pulse duration mismatch** – Check checkDurationMatch.m output for flagged sessions
+5. **Pulse duration mismatch** – Check checkDurationMatch.m output for flagged sessions, then verify raw TMSTrigger files for accuracy
 
 ## Contributing
 This package is under active development. Core functionality is stable, but additional features are planned. Contributions welcome!
@@ -170,4 +170,4 @@ This package is under active development. Core functionality is stable, but addi
 MIT License - see LICENSE file for details.
 
 ## Contact
-For questions about this package, please contact [Your Name] at [your.email@example.com].
+For questions about this package, please contact Timothy Ng at tinhang.ng@polyu.edu.hk.
