@@ -117,7 +117,7 @@ flowchart TD
 - **`mapSessionFiles.m`**: Maps extracted files to experimental sessions and conditions
 - **`readCoordFromFiles.m`**: Extracts 3D coordinates from Localite files
 - **`calculateCoords.m`**: Computes Euclidean distances between reference and target coordinates
-- **`checkDurationMatch.m`** – Checks whether pulse durations match expected values for each TMS condition
+- **`checkDurationMatch.m`**: Checks whether pulse durations match expected values for each TMS condition
 
 ### Utility Functions
 - **`validSessWide2Long.m`**: Converts wide-format session table to long format
@@ -161,7 +161,7 @@ config.run_organizeData = false;              % Skip if already organized
 2. **Missing coordinates**: Check that Localite files contain valid coordinate data
 3. **Session validation**: Ensure session CSV files match your experimental timeline
 4. **Path issues**: Use absolute paths or ensure MATLAB working directory is correct
-5. **Pulse duration mismatch** – Check checkDurationMatch.m output for flagged sessions, then verify raw TMSTrigger files for accuracy
+5. **Pulse duration mismatch**: Check checkDurationMatch.m output for flagged sessions, then verify raw TMSTrigger files for accuracy
 
 ## Contributing
 This package is under active development. Core functionality is stable, but additional features are planned. Contributions welcome!
