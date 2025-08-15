@@ -1,16 +1,17 @@
 # MATLAB TMS Postprocessing Package
 
 ## Description
-This MATLAB package processes Localite TMS (Transcranial Magnetic Stimulation) data to calculate Euclidean distances between coil positions and stimulus locations. It extracts coordinates from EntryTarget, InstrumentMarkers, and TMSTrigger files to assess TMS positioning accuracy and data quality.
+This MATLAB package processes Localite TMS (Transcranial Magnetic Stimulation) data to calculate Euclidean distances between coil positions and stimulus locations. It extracts coordinates from EntryTarget, InstrumentMarkers, and TMSTrigger files to assess TMS positioning accuracy, data quality, and pulse duration validity.
 
 **Status**: Work in progress - core functionality implemented, non-essential features pending.
 
 ## Features
 - Processes multiple TMS file types (EntryTarget, InstrumentMarkers, TMSTrigger)
 - Calculates Euclidean distances between reference points and TMS trigger locations
+- Checks whether pulse duration matches expected values per condition (e.g., iTBS ≈ 188 s, cTBS ≈ 40 s)
 - Supports multiple experimental conditions (Vertex, iTBS, cTBS)
 - Configurable pipeline with CSV-based session validation
-- Two execution modes: batch processing and self-contained single script
+- Two execution modes: batch processing and self-contained single .m script
 
 ## Installation
 Clone the repository:
@@ -98,8 +99,10 @@ flowchart TD
     L --> M[Optional: insmarker_equivalence<br/>Share markers between conditions]
     
     M --> N[Step 6: calculateCoords<br/>Compute Euclidean distances<br/>Reference → Target points]
+
+    N --> P[Step 7: durationCheck<br/>Verify pulse duration matches expected condition time]
     
-    N --> O[Output Results<br/>TMS_Quality_Raw.mat<br/>TMS_Quality_Summary.mat]
+    P --> O[Output Results<br/>TMS_Quality_Raw.mat<br/>TMS_Quality_Summary.mat]
     
     style C fill:#e1f5fe
     style D fill:#fff3e0
@@ -114,6 +117,7 @@ flowchart TD
 - **`mapSessionFiles.m`**: Maps extracted files to experimental sessions and conditions
 - **`readCoordFromFiles.m`**: Extracts 3D coordinates from Localite files
 - **`calculateCoords.m`**: Computes Euclidean distances between reference and target coordinates
+- **`checkDurationMatch.m`** – New: Checks whether pulse durations match expected values for each TMS condition
 
 ### Utility Functions
 - **`validSessWide2Long.m`**: Converts wide-format session table to long format
@@ -129,7 +133,7 @@ flowchart TD
 ### Pipeline Configuration (`functions/config/Tim_TMS_pipeline_config.m`)
 ```matlab
 config.subjects = 401:441;                    % Subject ID range
-config.size_threshold = 100000000;            % File size filter (100KB)
+config.size_threshold = 100000;            % File size filter (100KB)
 config.dirs.raw = 'data/raw/Tim_TMS';         % Raw data directory
 config.dirs.organized = 'data/organized/Tim_TMS'; % Output directory
 config.run_organizeData = false;              % Skip if already organized
@@ -149,14 +153,15 @@ config.run_organizeData = false;              % Skip if already organized
 
 ## Experimental Conditions
 - **Vertex**: Control condition with EntryTarget, InstrumentMarkers, and TMSTrigger
-- **iTBS**: Intermittent theta burst stimulation with InstrumentMarkers and TMSTrigger
-- **cTBS**: Continuous theta burst stimulation with InstrumentMarkers and TMSTrigger
+- **iTBS**: Intermittent theta burst stimulation with InstrumentMarkers and TMSTrigger (expected duration ≈ 188 s)
+- **cTBS**: Continuous theta burst stimulation with InstrumentMarkers and TMSTrigger (expected duration ≈ 40 s
 
 ## Troubleshooting
 1. **File size threshold**: Adjust `config.size_threshold` if TMSTrigger files are not detected
 2. **Missing coordinates**: Check that Localite files contain valid coordinate data
 3. **Session validation**: Ensure session CSV files match your experimental timeline
 4. **Path issues**: Use absolute paths or ensure MATLAB working directory is correct
+5. **Pulse duration mismatch** – Check checkDurationMatch.m output for flagged sessions
 
 ## Contributing
 This package is under active development. Core functionality is stable, but additional features are planned. Contributions welcome!
