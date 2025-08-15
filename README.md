@@ -117,7 +117,7 @@ flowchart TD
 - **`mapSessionFiles.m`**: Maps extracted files to experimental sessions and conditions
 - **`readCoordFromFiles.m`**: Extracts 3D coordinates from Localite files
 - **`calculateCoords.m`**: Computes Euclidean distances between reference and target coordinates
-- **`checkDurationMatch.m`** – New: Checks whether pulse durations match expected values for each TMS condition
+- **`checkDurationMatch.m`** – Checks whether pulse durations match expected values for each TMS condition
 
 ### Utility Functions
 - **`validSessWide2Long.m`**: Converts wide-format session table to long format
