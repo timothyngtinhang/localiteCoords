@@ -1,7 +1,7 @@
 # MATLAB TMS Postprocessing Package
 
 ## Description
-This MATLAB package processes Localite TMS (Transcranial Magnetic Stimulation) data to calculate Euclidean distances between coil positions and stimulus locations. It extracts coordinates from EntryTarget, InstrumentMarkers, and TMSTrigger files to assess TMS positioning accuracy, data quality, and pulse duration validity.
+This MATLAB package processes Localite TMS (Transcranial Magnetic Stimulation) data to calculate Euclidean distances between coil positions and stimulus locations. It extracts coordinates from EntryTarget, InstrumentMarkers, and TMSTrigger files to assess TMS positioning accuracy, data quality, and whether pulse duration matches expected values for each condition.
 
 **Status**: Work in progress - core functionality implemented, non-essential features pending.
 
@@ -154,7 +154,7 @@ config.run_organizeData = false;              % Skip if already organized
 ## Experimental Conditions
 - **Vertex**: Control condition with EntryTarget, InstrumentMarkers, and TMSTrigger
 - **iTBS**: Intermittent theta burst stimulation with InstrumentMarkers and TMSTrigger (expected duration ≈ 188 s)
-- **cTBS**: Continuous theta burst stimulation with InstrumentMarkers and TMSTrigger (expected duration ≈ 40 s
+- **cTBS**: Continuous theta burst stimulation with InstrumentMarkers and TMSTrigger (expected duration ≈ 40 s)
 
 ## Troubleshooting
 1. **File size threshold**: Adjust `config.size_threshold` if TMSTrigger files are not detected
