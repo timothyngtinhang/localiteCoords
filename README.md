@@ -100,7 +100,7 @@ flowchart TD
     
     M --> N[Step 6: calculateCoords<br/>Compute Euclidean distances<br/>Reference → Target points]
 
-    N --> P[Step 7: durationCheck<br/>Verify pulse duration matches expected condition time]
+    N --> P[Step 7: checkDurationMatch<br/>Verify pulse duration matches expected condition time]
     
     P --> O[Output Results<br/>TMS_Quality_Raw.mat<br/>TMS_Quality_Summary.mat]
     
