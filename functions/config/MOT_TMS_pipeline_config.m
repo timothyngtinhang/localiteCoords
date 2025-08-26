@@ -43,6 +43,7 @@ config.utils.run_validSessWide2Long = true; % Set to true to run validSessWide2L
 config.utils.run_manualReplaceFile = true;  % Set to true to run manualReplaceFile.m
 config.utils.run_insmarker_equivalence = true; % Set to true to run insmarker_equivalence.m
 config.utils.run_checkDurationMatch = true; % New: Set to true to run checkDurationMatch.m
+config.utils.run_CsvCompareCoords = true; % New: Set to true to run CsvCompareCoords.m
 
 % Parameters for validSessWide2Long.m
 config.utils.validSess.wide_file = 'MOT_optional_valid_session_list_wide.csv';
