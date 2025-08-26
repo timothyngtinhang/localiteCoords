@@ -105,6 +105,11 @@ if config.utils.run_insmarker_equivalence
     all_files_with_coord_eq = insmarker_equivalence(all_files_with_coord, config.utils.insmarker_equivalence.markers);
 end
 
+% Run CsvCompareCoords function
+if config.utils.run_CsvCompareCoords
+    [CsvCompareCoords, CsvSummaryTable] = CsvCompareCoords(all_files_with_coord_eq, 'native_coords_summary.csv');
+end
+
 % every distance condition --------------------------
 % tms_contrast = struct( ...
 %     'GreenEntry', struct('RefType','EntryTarget',  'RowCond',"Vertex", 'idx',1 ), ... % Green Entry Point for Vertex condition
