@@ -109,7 +109,7 @@ data/
 **Processing Workflow**
 -----------------------
 
-```
+``` mermaid
 flowchart TD
     A[Raw Localite Data<br/>EntryTarget, InstrumentMarkers, TMSTrigger] --> B{Choose Processing Mode}
 
